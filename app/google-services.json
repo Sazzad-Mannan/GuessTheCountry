@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "637409266980",
+    "project_id": "guess-the-country-c9e3e",
+    "storage_bucket": "guess-the-country-c9e3e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:637409266980:android:95aa9ebd264b962c13b7b1",
+        "android_client_info": {
+          "package_name": "com.riftech.guessthecountry"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "637409266980-0etpet22p0025msdkkhsgqk3d2cj5nck.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvCgL9uFbcPVu3JPihVR-8Cw6TfFfqjHg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "637409266980-0etpet22p0025msdkkhsgqk3d2cj5nck.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
