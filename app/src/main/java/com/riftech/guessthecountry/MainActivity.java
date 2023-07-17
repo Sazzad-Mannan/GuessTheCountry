@@ -3,6 +3,7 @@ package com.riftech.guessthecountry;
 import static android.content.ContentValues.TAG;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
@@ -34,6 +35,12 @@ import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
+import com.google.android.ump.ConsentDebugSettings;
+import com.google.android.ump.ConsentForm;
+import com.google.android.ump.ConsentInformation;
+import com.google.android.ump.ConsentRequestParameters;
+import com.google.android.ump.FormError;
+import com.google.android.ump.UserMessagingPlatform;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -59,10 +66,57 @@ TextView txt;
     String[] countries;
     int selected_index;
     Button btn;
+    private ConsentInformation consentInformation;
+    private ConsentForm consentForm;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+//        ConsentDebugSettings debugSettings = new ConsentDebugSettings.Builder(this)
+//                .setDebugGeography(ConsentDebugSettings.DebugGeography.DEBUG_GEOGRAPHY_EEA)
+//                .addTestDeviceHashedId("C0C3585D7681D1732E0C5A43C804A1C6")
+//                .build();
+//
+//
+//        ConsentRequestParameters params = new ConsentRequestParameters
+//                .Builder()
+//                .setConsentDebugSettings(debugSettings)
+//                .build();
+
+
+
+        // Set tag for under age of consent. false means users are not under
+        // age.
+        ConsentRequestParameters params = new ConsentRequestParameters
+                .Builder()
+                .setTagForUnderAgeOfConsent(false)
+                .build();
+
+        consentInformation = UserMessagingPlatform.getConsentInformation(this);
+        consentInformation.requestConsentInfoUpdate(
+                this,
+                params,
+                new ConsentInformation.OnConsentInfoUpdateSuccessListener() {
+                    @Override
+                    public void onConsentInfoUpdateSuccess() {
+                        // The consent information state was updated.
+                        // You are now ready to check if a form is available.
+
+                        if (consentInformation.isConsentFormAvailable()) {
+
+                            loadForm();
+                        }
+                    }
+                },
+                new ConsentInformation.OnConsentInfoUpdateFailureListener() {
+                    @Override
+                    public void onConsentInfoUpdateFailure(FormError formError) {
+                        // Handle the error.
+                   }
+                });
+
+
 
 
         // Storing data into SharedPreferences
@@ -445,6 +499,40 @@ st_n2=true;
                 break;
         }
 
+    }
+
+    public void loadForm() {
+        // Loads a consent form. Must be called on the main thread.
+        UserMessagingPlatform.loadConsentForm(
+                this,
+                new UserMessagingPlatform.OnConsentFormLoadSuccessListener() {
+                    @Override
+                    public void onConsentFormLoadSuccess(ConsentForm consentForm) {
+                        MainActivity.this.consentForm = consentForm;
+                        if (consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.REQUIRED) {
+                            consentForm.show(
+                                    MainActivity.this,
+                                    new ConsentForm.OnConsentFormDismissedListener() {
+                                        @Override
+                                        public void onConsentFormDismissed(@Nullable FormError formError) {
+                                            if (consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.OBTAINED) {
+                                                // App can start requesting ads.
+                                            }
+
+                                            // Handle dismissal by reloading form.
+                                            loadForm();
+                                        }
+                                    });
+                        }
+                    }
+                },
+                new UserMessagingPlatform.OnConsentFormLoadFailureListener() {
+                    @Override
+                    public void onConsentFormLoadFailure(FormError formError) {
+                        // Handle the error.
+                 }
+                }
+        );
     }
 
 }
